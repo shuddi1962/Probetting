@@ -1,4 +1,5 @@
 // app/layout.tsx — Root layout with metadata
+// Debug: trigger deploy to refresh cache
 import type { Metadata } from 'next';
 import './globals.css';
 
