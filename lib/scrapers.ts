@@ -70,7 +70,7 @@ export async function getSofascoreEventsByDate(date: string): Promise<SofascoreM
   return withCache(`sof_events_${date}`, 300, async () => {
     try {
       const res = await politeGet(
-        `${SOFASCORE_BASE}/sport/football/scheduled-events/${date}`,
+        `${SOFASCORE_BASE}/sport/football/scheduled-events/${date}/inverse`,
         SOFASCORE_HEADERS
       );
       if (!res.ok) return [];
