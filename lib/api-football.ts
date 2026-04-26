@@ -58,7 +58,7 @@ export interface APFFixture {
 
 export async function getFixturesByDate(date: string): Promise<APFFixture[]> {
   return withCache(`apf_fixtures_date_${date}`, TTL.fixtures, () =>
-    apfGet<APFFixture[]>('/fixtures', { date, timezone: 'Africa/Lagos' })
+    apfGet<APFFixture[]>('/fixtures', { date, timezone: 'Africa/Lagos', season: 2024 })
   );
 }
 

@@ -31,7 +31,7 @@ async function politeGet(url: string, headers?: Record<string, string>): Promise
 
 const SOFASCORE_BASE = 'https://api.sofascore.com/api/v1';
 const SOFASCORE_HEADERS = {
-  // Removed headers to avoid 403
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 };
 
 export interface SofascoreMatchSummary {
