@@ -6,6 +6,35 @@ function formatTime(dateStr: string) {
   return new Date(dateStr).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Lagos' });
 }
 
+interface Fixture {
+  fixture: {
+    id: number;
+    status: {
+      short: string;
+      elapsed?: number;
+    };
+    date: string;
+  };
+  teams: {
+    home: {
+      logo: string;
+      name: string;
+    };
+    away: {
+      logo: string;
+      name: string;
+    };
+  };
+  goals: {
+    home: number | null;
+    away: number | null;
+  };
+  league: {
+    name: string;
+    country: string;
+  };
+}
+
 interface ValueBet {
   market: string;
   selection: string;
@@ -21,8 +50,8 @@ interface ValueBet {
 
 export default async function Dashboard() {
   // Static demo data
-  const fixtures = [];
-  const live = [];
+  const fixtures: Fixture[] = [];
+  const live: Fixture[] = [];
   const valueBets = [
     {
       market: 'Match Winner',
