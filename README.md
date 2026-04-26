@@ -1,5 +1,8 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+# Pro Betting — Football Analytics & Prediction Platform
+Real-time football predictions powered by API-Football, Sportmonks, xG data, and advanced Poisson modelling. 250+ betting markets with full reasoning.
+
 ## Getting Started
 
 First, run the development server:
