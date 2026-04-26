@@ -1,4 +1,4 @@
-// app/layout.tsx
+// app/layout.tsx — Root layout with metadata
 import type { Metadata } from 'next';
 import './globals.css';
 
