@@ -1,5 +1,73 @@
 // lib/fallbacks.ts - Maps fallback APIs to API-Football format
 
+export interface FlashscoreMatch {
+  id: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number | null;
+  awayScore: number | null;
+  status: { code: number; description: string; type: string };
+  startTimestamp: number;
+  league: { id: string; name: string; country: string };
+}
+
+export function mapFlashscoreToAPF(fs: FlashscoreMatch) {
+  let short = 'NS';
+  let elapsed: number | null = null;
+
+  if (fs.status.type === 'finished') {
+    short = 'FT';
+  } else if (fs.status.type === 'inprogress') {
+    short = '1H';
+    elapsed = Math.floor((Date.now() / 1000 - fs.startTimestamp) / 60);
+    if (elapsed > 45) {
+      short = '2H';
+      elapsed = elapsed - 45;
+    }
+    if (fs.status.description?.includes('Half')) {
+      short = 'HT';
+      elapsed = 45;
+    }
+  } else if (fs.status.type === 'canceled') {
+    short = 'CANC';
+  }
+
+  const homeWin = fs.homeScore !== null && fs.awayScore !== null && fs.homeScore > fs.awayScore;
+  const awayWin = fs.homeScore !== null && fs.awayScore !== null && fs.awayScore > fs.homeScore;
+
+  return {
+    fixture: {
+      id: parseInt(fs.id),
+      referee: null,
+      timezone: 'UTC',
+      date: new Date(fs.startTimestamp * 1000).toISOString(),
+      timestamp: fs.startTimestamp,
+      venue: { id: null, name: null, city: null },
+      status: { long: fs.status.description || 'Not Started', short, elapsed }
+    },
+    league: {
+      id: parseInt(fs.league.id) || 0,
+      name: fs.league.name || 'League',
+      country: fs.league.country || 'World',
+      logo: '',
+      flag: null,
+      season: new Date().getFullYear(),
+      round: 'Round 1'
+    },
+    teams: {
+      home: { id: 0, name: fs.homeTeam, logo: '', winner: homeWin },
+      away: { id: 0, name: fs.awayTeam, logo: '', winner: awayWin }
+    },
+    goals: { home: fs.homeScore ?? null, away: fs.awayScore ?? null },
+    score: {
+      halftime: { home: null, away: null },
+      fulltime: { home: fs.homeScore ?? null, away: fs.awayScore ?? null },
+      extratime: { home: null, away: null },
+      penalty: { home: null, away: null }
+    }
+  };
+}
+
 export function mapSMtoAPF(sm: any) {
   const home = sm.participants?.find((p: any) => p.meta?.location === 'home') || sm.participants?.[0] || {};
   const away = sm.participants?.find((p: any) => p.meta?.location === 'away') || sm.participants?.[1] || {};

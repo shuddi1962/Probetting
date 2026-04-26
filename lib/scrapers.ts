@@ -1,4 +1,4 @@
-// lib/scrapers.ts — Free web scrapers (Sofascore public API, FBref, Understat, etc.)
+// lib/scrapers.ts — Free web scrapers (Sofascore public API, Flashscore, FBref, Understat, etc.)
 // These run server-side only and supplement the paid APIs
 
 import { withCache } from './cache';
@@ -309,6 +309,99 @@ export async function getTeamInjuriesFromTransfermarkt(teamSlug: string, teamId:
         }
       }
       return injuries;
+    } catch {
+      return [];
+    }
+  });
+}
+
+// ─── FLASHSCORE SCRAPER ─────────────────────────────────────────────────────────
+
+export interface FlashscoreMatch {
+  id: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number | null;
+  awayScore: number | null;
+  status: { code: number; description: string; type: string };
+  startTimestamp: number;
+  league: { id: string; name: string; country: string };
+  homeTeamId: string;
+  awayTeamId: string;
+}
+
+async function getFlashscoreSession(): Promise<{ sessionId: string } | null> {
+  try {
+    const res = await fetch('https://www.flashscore.com', {
+      headers: {
+        'User-Agent': randomUA(),
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+      next: { revalidate: 0 },
+    });
+    const cookies = res.headers.get('set-cookie');
+    return { sessionId: cookies || '' };
+  } catch {
+    return null;
+  }
+}
+
+export async function getFlashscoreEventsByDate(date: string): Promise<FlashscoreMatch[]> {
+  return withCache(`flashscore_${date}`, 300, async () => {
+    try {
+      const session = await getFlashscoreSession();
+      const headers: Record<string, string> = {
+        'User-Agent': randomUA(),
+        'Accept': 'application/json, text/plain, */*',
+        'x-requested-with': 'XMLHttpRequest',
+        'Referer': 'https://www.flashscore.com/',
+      };
+      if (session?.sessionId) {
+        headers['Cookie'] = session.sessionId;
+      }
+
+      const dateObj = new Date(date);
+      const formattedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+
+      const res = await fetch(
+        `https://www.flashscore.com/x/feed/f_1_${formattedDate}?tz=Africa%2FLagos&lang=en`,
+        { headers, next: { revalidate: 0 } }
+      );
+
+      if (!res.ok) return [];
+
+      const json: any = await res.json();
+      const events = (json.RESULT || []) as FlashscoreMatch[];
+      return events.filter((e) => e.status.type !== 'finished'); // Only upcoming/live
+    } catch {
+      return [];
+    }
+  });
+}
+
+export async function getFlashscoreLive(): Promise<FlashscoreMatch[]> {
+  return withCache('flashscore_live', 30, async () => {
+    try {
+      const session = await getFlashscoreSession();
+      const headers: Record<string, string> = {
+        'User-Agent': randomUA(),
+        'Accept': 'application/json, text/plain, */*',
+        'x-requested-with': 'XMLHttpRequest',
+        'Referer': 'https://www.flashscore.com/',
+      };
+      if (session?.sessionId) {
+        headers['Cookie'] = session.sessionId;
+      }
+
+      const res = await fetch(
+        'https://www.flashscore.com/x/feed/l_2_?tz=Africa%2FLagos&lang=en',
+        { headers, next: { revalidate: 0 } }
+      );
+
+      if (!res.ok) return [];
+
+      const json: any = await res.json();
+      return (json.RESULT || []) as FlashscoreMatch[];
     } catch {
       return [];
     }

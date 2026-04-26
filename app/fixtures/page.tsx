@@ -39,14 +39,17 @@ export default function FixturesPage() {
     fetch(`/api/fixtures?date=${date}`)
       .then(r => r.json())
       .then(d => {
-        let apfFixtures: Fixture[] = d.apf || [];
-        if (apfFixtures.length === 0) {
-          if (d.sof && d.sof.length > 0) apfFixtures = [...apfFixtures, ...d.sof.map(mapSofascoreToAPF)];
+        // Use normalized fixtures from API; fallback to manual mapping if needed
+        let normalized: Fixture[] = (d as any).fixtures || [];
+        if (normalized.length === 0) {
+          const apf = d.apf || [];
+          const sof = (d.sof || []).map(mapSofascoreToAPF);
+          normalized = [...apf, ...sof] as Fixture[];
         }
         if (league !== '0') {
-          apfFixtures = apfFixtures.filter(f => String(f.league.id) === league);
+          normalized = normalized.filter(f => String(f.league.id) === league);
         }
-        setFixtures(apfFixtures);
+        setFixtures(normalized);
       })
       .catch(e => setError(String(e)))
       .finally(() => setLoading(false));
