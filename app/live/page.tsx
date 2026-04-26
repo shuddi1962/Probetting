@@ -56,9 +56,17 @@ export default function LivePage() {
     return () => clearInterval(t);
   }, [refresh]);
 
-  let apfLive = data?.apf || [];
+  let apfLive = (data as any).fixtures || [];
   if (apfLive.length === 0) {
-    if (data?.sofascore && data.sofascore.length > 0) apfLive = [...apfLive, ...data.sofascore.map(mapSofascoreToAPF)];
+    const apf = data?.apf || [];
+    const sof = (data?.sofascore || []).map(mapSofascoreToAPF);
+    const flash = (data?.flashscore || []).map((f: any) => ({
+      fixture: { id: parseInt(f.id), status: { short: f.status.type === 'inprogress' ? '1H' : f.status.type === 'finished' ? 'FT' : 'NS', elapsed: f.status.type === 'inprogress' ? Math.floor((Date.now()/1000 - f.startTimestamp)/60) : null }, date: new Date(f.startTimestamp * 1000).toISOString() },
+      league: { id: 0, name: f.league.name, country: f.league.country, logo: '' },
+      teams: { home: { id: 0, name: f.homeTeam, logo: '', winner: false }, away: { id: 0, name: f.awayTeam, logo: '', winner: false } },
+      goals: { home: f.homeScore ?? null, away: f.awayScore ?? null }
+    }));
+    apfLive = [...apf, ...sof, ...flash];
   }
 
   return (

@@ -50,17 +50,7 @@ interface ValueBet {
 
 export default async function Dashboard() {
   // Static demo data
-  const fixtures: Fixture[] = [
-    {
-      fixture: { id: 1, date: new Date().toISOString(), status: { short: 'NS', elapsed: null } },
-      league: { id: 39, name: 'Premier League', country: 'England', logo: '' },
-      teams: {
-        home: { logo: '', name: 'Arsenal' },
-        away: { logo: '', name: 'Chelsea' }
-      },
-      goals: { home: null, away: null }
-    }
-  ];
+  const fixtures: Fixture[] = [];
   const live: Fixture[] = [];
   const valueBets = [
     {
