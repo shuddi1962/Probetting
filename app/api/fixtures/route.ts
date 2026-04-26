@@ -12,6 +12,8 @@ export async function GET(req: NextRequest) {
       date,
       apf: apf.status === 'fulfilled' ? apf.value : [],
       sof: sof.status === 'fulfilled' ? sof.value : [],
+      apfError: apf.status === 'rejected' ? String(apf.reason) : null,
+      sofError: sof.status === 'rejected' ? String(sof.reason) : null,
       source: apf.status === 'fulfilled' && apf.value.length > 0 ? 'api-football' : 'sofascore',
     });
   } catch (e: unknown) {

@@ -16,6 +16,9 @@ async function apfGet<T>(endpoint: string, params?: Record<string, string | numb
 
   const res = await fetch(url.toString(), { headers: getApfHeaders(0) });
   const json = await res.json();
+  if (!res.ok) {
+    throw new Error(`API-Football HTTP ${res.status}: ${JSON.stringify(json)}`);
+  }
   if (json.errors && Object.keys(json.errors).length > 0) {
     throw new Error(`API-Football error: ${JSON.stringify(json.errors)}`);
   }
