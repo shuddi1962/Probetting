@@ -27,7 +27,7 @@ function formatTime(dateStr: string) {
 }
 
 export default function FixturesPage() {
-  const [date, setDate] = useState('2024-04-26');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [league, setLeague] = useState('0');
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
   const [loading, setLoading] = useState(false);
